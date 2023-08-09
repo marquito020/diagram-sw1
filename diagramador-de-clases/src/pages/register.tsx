@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 
 import { RegisterCustomForm } from '../interfaces/user.interface';
 import { useRegister } from '../hooks/useRegister';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 type ConnectorModalProps = {
     onSubmit: (sourceId: string, targetId: string, relationship: string, multiplicity: string) => void;

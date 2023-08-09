@@ -11,17 +11,17 @@ import {
   RelationShipModel,
 } from '@syncfusion/ej2-react-diagrams';
 
-import ClassModal from '../components/ClassModal.tsx';
+import ClassModal from '../components/ClassModal';
 
-import AttributeModal from '../components/AttributeModal.tsx';
+import AttributeModal from '../components/AttributeModal';
 
-import ConnectorModal from '../components/ConnectorModal.tsx';
+import ConnectorModal from '../components/ConnectorModal';
 
 import { registerLicense } from '@syncfusion/ej2-base';
-import { resetUser } from '../redux/states/user.state.ts';
-import { getDiagram, updateDiagram } from '../services/diagram.service.ts';
-import NodeModal from '../components/NodeModal.tsx';
-import DatabaseScriptModal from '../components/DatabaseScriptModal.tsx';
+import { resetUser } from '../redux/states/user.state';
+import { getDiagram, updateDiagram } from '../services/diagram.service';
+import NodeModal from '../components/NodeModal';
+import DatabaseScriptModal from '../components/DatabaseScriptModal';
 
 let nodeId: string | null = null;
 
