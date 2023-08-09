@@ -22,6 +22,7 @@ import { resetUser } from '../redux/states/user.state';
 import { getDiagram, updateDiagram } from '../services/diagram.service';
 import NodeModal from '../components/NodeModal';
 import DatabaseScriptModal from '../components/DatabaseScriptModal';
+import EditConnectorModal from '../components/EditConnectorModal';
 
 let nodeId: string | null = null;
 
@@ -90,6 +91,7 @@ function UMLClassDiagram() {
   const [connectors, setConnectors] = useState<CustomConnector[]>([]);
   const diagramInstanceRef = useRef<DiagramComponent>(null); // Ref to store the diagram instance
   const [nodeIdCreateAtribute, setNodeIdCreateAtribute] = useState(null);
+  const [connectorId, setConnectorId] = useState(null);
   const navigate = useNavigate();
   const params = useParams();
 
@@ -99,6 +101,9 @@ function UMLClassDiagram() {
   // Nuevo estado para almacenar el ID del nodo seleccionado
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
+  // Nuevo estado para almacenar el ID del conector seleccionado
+  const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
+
   // Nuevo estado para controlar la visibilidad del modal de atributo
   const [showAttributeModal, setShowAttributeModal] = useState(false);
 
@@ -107,6 +112,9 @@ function UMLClassDiagram() {
 
   // Nuevo estado para controlar la visibilidad del modal de editar nodo
   const [showNodeModal, setShowNodeModal] = useState(false);
+
+  // Nuevo estado para controlar la visibilidad del modal editar connector
+  const [showConnectorEditModal, setShowConnectorEditModal] = useState(false);
 
   // Nuevo estado para controlar la visibilidad del modal script de base de datos
   const [showDatabaseScriptModal, setShowDatabaseScriptModal] = useState(false);
@@ -135,6 +143,17 @@ function UMLClassDiagram() {
   // Función para cerrar el modal de editar nodo
   const closeNodeModal = () => {
     setShowNodeModal(false);
+  };
+
+  // Funcion para abrir el modal de editar conector
+  const openConnectorEditModal = (connectorId: string) => {
+    setSelectedConnectorId(connectorId);
+    setShowConnectorEditModal(true);
+  };
+
+  // Funcion para cerrar el modal de editar conector
+  const closeConnectorEditModal = () => {
+    setShowConnectorEditModal(false);
   };
 
 
@@ -179,6 +198,7 @@ function UMLClassDiagram() {
       }
     });
     setNodes(nodes);
+    updateDiagram({ id: params._id, nodes: nodes, connectors: connectors });
     closeNodeModal();
   };
 
@@ -285,8 +305,16 @@ function UMLClassDiagram() {
       console.log('Node clicked', args.element.children);
     }
 
+    if (args.element && args.element.id && args.element.shape) {
+      console.log('Connector', args.element.id);
+      setConnectorId(args.element.id);
+    } else {
+      setConnectorId(null);
+    }
+
     if (args.element && args.element.id && args.element.shape && args.element.shape.classShape) {
       /* nodeIdCreateAtribute = args.element.id; */
+      console.log('Node clicked', args.element.id);
       setNodeIdCreateAtribute(args.element.id);
     } else {
       /* nodeIdCreateAtribute = null; */
@@ -464,6 +492,12 @@ function UMLClassDiagram() {
               onClick={() => openNodeModal(nodeIdCreateAtribute)}>Editar Nodo</button>
           )}
 
+          {/* Botón para abrir el modal de editar conector */}
+          {connectorId && (
+            <button className='bg-green-500 mr-3 hover:bg-green-600 text-white px-4 py-2 rounded'
+              onClick={() => openConnectorEditModal(connectorId)}>Editar Conector</button>
+          )}
+
           {/* Boton para abrir el modal de script base de datos */}
           <button className='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded'
             onClick={openDatabaseScriptModal}>Script Base de Datos</button>
@@ -509,7 +543,7 @@ function UMLClassDiagram() {
           getConnectorDefaults={(connector: any) => {
             connector.style.strokeColor = '#8D8D8D';
             connector.style.strokeWidth = 3;
-            connector.targetDecorator.style.fill = '#8D8D8D';
+            /* connector.targetDecorator.style.fill = '#8D8D8D'; */
             connector.targetDecorator.style.strokeColor = '#8D8D8D';
             /* connector.targetDecorator.style.strokeWidth = 3; */
 
@@ -596,6 +630,44 @@ function UMLClassDiagram() {
         />
       )}
 
+      {/* Modal para editar conecctor */}
+      {showConnectorEditModal && (
+        <EditConnectorModal
+          connectorId={selectedConnectorId}
+          connector={
+            connectors.find((connector) => connector.id === selectedConnectorId) || {
+              id: '',
+              sourceID: '',
+              targetID: '',
+              type: 'Orthogonal',
+              shape: {
+                relationship: 'Association',
+                type: 'UmlClassifier',
+                multiplicity: {
+                  type: 'OneToOne',
+                }
+              }
+            }
+          }
+          onSubmit={
+            (connectorId: string, updatedConnector: CustomConnector) => {
+              connectors.map((connector) => {
+                if (connector.id === connectorId) {
+                  connector.id = updatedConnector.id;
+                  connector.sourceID = updatedConnector.sourceID;
+                  connector.targetID = updatedConnector.targetID;
+                  connector.type = updatedConnector.type;
+                  connector.shape = updatedConnector.shape;
+                }
+              });
+              setConnectors(connectors);
+              updateDiagram({ id: params._id, nodes: nodes, connectors: connectors });
+              closeConnectorEditModal();
+            }
+          }
+          onClose={closeConnectorEditModal}
+        />
+      )}
     </div>
   );
 }

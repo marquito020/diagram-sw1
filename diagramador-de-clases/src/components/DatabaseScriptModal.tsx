@@ -1,5 +1,5 @@
 import { RelationShipModel, Segments } from '@syncfusion/ej2-diagrams';
-import  { useState } from 'react';
+import { useState } from 'react';
 
 type Attribute = {
     name: string;
@@ -40,6 +40,7 @@ const DatabaseScriptModal: React.FC<DatabaseScriptModalProps> = ({
     onClose,
 }) => {
     const [script, setScript] = useState<string>('');
+    const [selectedDbType, setSelectedDbType] = useState<string>('');
 
     const typeConversion: TypeConversion = {
         string: 'VARCHAR(255)',
@@ -50,21 +51,82 @@ const DatabaseScriptModal: React.FC<DatabaseScriptModalProps> = ({
     const generateScript = () => {
         let generatedScript = '';
 
-        nodes.forEach((node) => {
-            generatedScript += `CREATE TABLE ${node.className} (\n`;
-            generatedScript += `  id INT PRIMARY KEY AUTO_INCREMENT,\n`; // Add ID column
-            node.attributes.forEach((attribute) => {
-                const convertedType = typeConversion[attribute.type];
-                generatedScript += `  ${attribute.name} ${convertedType},\n`;
+        if (selectedDbType === 'SqlServer') {
+            nodes.forEach((node) => {
+
+                generatedScript += `CREATE TABLE ${node.className} (\n`;
+                generatedScript += `  id INT PRIMARY KEY NOT NULL IDENTITY(1,1),\n`;
+                node.attributes.forEach((attribute) => {
+                    const convertedType = typeConversion[attribute.type];
+                    generatedScript += `  ${attribute.name} ${convertedType},\n`;
+                });
+                generatedScript += `);\n\n`;
             });
-            generatedScript += `);\n\n`;
-        });
 
-        connectors.forEach((connector) => {
-            generatedScript += `ALTER TABLE ${connector.sourceID} ADD CONSTRAINT fk_${connector.sourceID}_${connector.targetID} FOREIGN KEY (${connector.sourceID}) REFERENCES ${connector.targetID} (id);\n\n`;
-        });
+            connectors.forEach((connector) => {
+                const sourceNode = nodes.find((node) => node.id === connector.sourceID);
+                const targetNode = nodes.find((node) => node.id === connector.targetID);
 
-        setScript(generatedScript);
+                if (sourceNode && targetNode) {
+                    generatedScript += `ALTER TABLE ${sourceNode.className} ADD CONSTRAINT fk_${sourceNode.className}_${targetNode.className} FOREIGN KEY (id) REFERENCES ${targetNode.className} (id);\n\n`;
+                }
+            });
+
+            setScript(generatedScript);
+            return;
+        } else if (selectedDbType === 'MariaDB') {
+            nodes.forEach((node) => {
+                generatedScript += `CREATE TABLE ${node.className} (\n`;
+                generatedScript += `  id INT PRIMARY KEY,\n`;
+                node.attributes.forEach((attribute) => {
+                    const convertedType = typeConversion[attribute.type];
+                    if (node.attributes.indexOf(attribute) === node.attributes.length - 1) {
+                        generatedScript += `  ${attribute.name} ${convertedType}\n`;
+                    } else {
+                        generatedScript += `  ${attribute.name} ${convertedType},\n`;
+                    }
+                });
+                generatedScript += `);\n\n`;
+            });
+
+            connectors.forEach((connector) => {
+                const sourceNode = nodes.find((node) => node.id === connector.sourceID);
+                const targetNode = nodes.find((node) => node.id === connector.targetID);
+
+                if (sourceNode && targetNode) {
+                    generatedScript += `ALTER TABLE ${sourceNode.className} ADD CONSTRAINT fk_${sourceNode.className}_${targetNode.className} FOREIGN KEY (id) REFERENCES ${targetNode.className} (id);\n\n`;
+                }
+            });
+
+            setScript(generatedScript);
+            return;
+        } else if (selectedDbType === 'Postgres') {
+            nodes.forEach((node) => {
+                generatedScript += `CREATE TABLE ${node.className} (\n`;
+                generatedScript += `  id INT PRIMARY KEY,\n`;
+                node.attributes.forEach((attribute) => {
+                    const convertedType = typeConversion[attribute.type];
+                    if (node.attributes.indexOf(attribute) === node.attributes.length - 1) {
+                        generatedScript += `  ${attribute.name} ${convertedType}\n`;
+                    } else {
+                        generatedScript += `  ${attribute.name} ${convertedType},\n`;
+                    }
+                });
+                generatedScript += `);\n\n`;
+            });
+
+            connectors.forEach((connector) => {
+                const sourceNode = nodes.find((node) => node.id === connector.sourceID);
+                const targetNode = nodes.find((node) => node.id === connector.targetID);
+
+                if (sourceNode && targetNode) {
+                    generatedScript += `ALTER TABLE ${sourceNode.className} ADD CONSTRAINT fk_${sourceNode.className}_${targetNode.className} FOREIGN KEY (id) REFERENCES ${targetNode.className} (id);\n\n`;
+                }
+            });
+
+            setScript(generatedScript);
+            return;
+        }
     };
 
     return (
@@ -73,20 +135,43 @@ const DatabaseScriptModal: React.FC<DatabaseScriptModalProps> = ({
                 <h2 className="text-xl font-bold mb-4">Script de Base de Datos</h2>
 
                 <div>
-                    <button
-                        className="bg-blue-500 text-white px-4 py-2 rounded shadow"
-                        onClick={generateScript}
-                    >
-                        Generar Script
-                    </button>
+                    <div className="mb-4">
+                        <button
+                            className={`bg-blue-500 text-white px-4 py-2 rounded shadow ${selectedDbType === 'SqlServer' ? 'bg-blue-600' : ''}`}
+                            onClick={() => {
+                                setSelectedDbType('SqlServer');
+                                generateScript();
+                            }}
+                        >
+                            Generar Script para SqlServer
+                        </button>
+                        <button
+                            className={`mt-3 bg-green-500 text-white px-4 py-2 rounded shadow ${selectedDbType === 'OracleSql' ? 'bg-green-600' : ''}`}
+                            onClick={() => {
+                                setSelectedDbType('MariaDB');
+                                generateScript();
+                            }}
+                        >
+                            Generar Script para MariaDB
+                        </button>
+                        <button
+                            className={`mt-3 bg-purple-500 text-white px-4 py-2 rounded shadow ${selectedDbType === 'Postgres' ? 'bg-purple-600' : ''}`}
+                            onClick={() => {
+                                setSelectedDbType('Postgres');
+                                generateScript();
+                            }}
+                        >
+                            Generar Script para Postgres
+                        </button>
+                    </div>
                     <textarea
-                        className="w-full border rounded px-3 py-2 mt-4"
+                        className="w-full border rounded px-3 py-2 mt-2 mb-4"
                         rows={10}
                         value={script}
                         readOnly
                     />
                     <button
-                        className="bg-red-500 text-white px-4 py-2 rounded shadow mt-4"
+                        className="bg-red-500 text-white px-4 py-2 rounded shadow"
                         onClick={onClose}
                     >
                         Cerrar
