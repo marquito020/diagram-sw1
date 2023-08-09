@@ -1,5 +1,5 @@
 import { RelationShipModel, Segments } from '@syncfusion/ej2-diagrams';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 
 type Attribute = {
     name: string;

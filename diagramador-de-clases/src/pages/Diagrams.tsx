@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createDiagram, deleteDiagram, getDiagrams, updateDiagramName } from '../services/diagram.service';
 import { resetUser } from '../redux/states/user.state';
 import { useDispatch, useSelector } from "react-redux";

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { LoginCustomForm } from "../interfaces/auth.interface";
 import { useLogin } from "../hooks/useAuth";

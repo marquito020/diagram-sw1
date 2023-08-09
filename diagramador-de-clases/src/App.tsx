@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import UMLClassDiagram from './pages/UMLClassDiagram.tsx';
-import Login from "./pages/login.tsx";
-import Register from "./pages/register.tsx";
+import UMLClassDiagram from './pages/UMLClassDiagram';
+import Login from "./pages/login";
+import Register from "./pages/register";
 import { Provider } from "react-redux";
-import { store } from "./redux/store.ts";
-import Diagrams from "./pages/Diagrams.tsx";
+import { store } from "./redux/store";
+import Diagrams from "./pages/Diagrams";
 
 /* import './App.css'; */
 
