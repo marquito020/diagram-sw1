@@ -16,6 +16,8 @@
     "@syncfusion/ej2-react-base": "^22.2.5",
     "@syncfusion/ej2-react-diagrams": "^22.2.7",
     "@syncfusion/ej2-react-dropdowns": "^22.2.5",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.1.2",
@@ -26,6 +28,7 @@
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.5",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

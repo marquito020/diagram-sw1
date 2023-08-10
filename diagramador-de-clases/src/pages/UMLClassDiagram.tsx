@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { useNavigate, useParams } from "react-router-dom";
 import { socket } from "../config/socket";
+import * as JSZip from 'jszip';
+import * as FileSaver from 'file-saver';
 /* import { io } from 'socket.io-client'; */
 import {
   DiagramComponent,
@@ -443,6 +445,55 @@ function UMLClassDiagram() {
     // Redirigir o realizar otras acciones después de cerrar sesión
   };
 
+  // Función para generar y descargar el archivo .zip
+  const generateAndDownloadZip = async () => {
+    const zip = new JSZip();
+
+    // Crear contenido HTML con nodos y atributos
+    let htmlContent = '<html><head><link rel="stylesheet" type="text/css" href="styles.css"></head><body>';
+
+    nodes.forEach((node) => {
+      htmlContent += `<h2>${node.className}</h2><table class="attribute-table">`;
+
+      // Botón para añadir columna
+      htmlContent += `<tr><td colspan="${node.attributes.length + 1}" class="add-column-cell">
+                          <button class="add-column-button">Añadir columna</button>
+                      </td></tr>`;
+
+      // Crear una fila por cada atributo
+      htmlContent += '<tr>';
+      node.attributes.forEach((attribute) => {
+        htmlContent += `<td class="attribute-cell">${attribute.name}</td>`;
+      });
+      htmlContent += '</tr>';
+
+      htmlContent += '<tr>';
+      node.attributes.forEach(() => {
+        // Botones de editar y eliminar
+        htmlContent += `<td class="value-cell">
+                          <h3>Valor</h3>
+                          <button class="edit-button">Editar</button>
+                          <button class="delete-button">Eliminar</button>
+                      </td>`;
+      });
+      htmlContent += '</tr>';
+
+      htmlContent += '</table>';
+    });
+
+    htmlContent += '</body></html>';
+
+    // Agregar archivos al archivo .zip
+    zip.file('index.htm', htmlContent);
+    zip.file('styles.css', '.attribute-table { border-collapse: collapse; width: 100%; } .attribute-cell, .value-cell { border: 1px solid black; padding: 8px; text-align: center; } .add-column-cell { text-align: right; padding: 10px; } .add-column-button { background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer; } .edit-button, .delete-button { background-color: #008CBA; color: white; border: none; padding: 5px 10px; margin: 0 2px; cursor: pointer; }');
+
+    // Generar el archivo .zip
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+    // Descargar el archivo .zip
+    FileSaver.saveAs(zipBlob, 'diagram.zip');
+  };
+
   return (
     <div className="control-section">
       <nav className="bg-blue-500 p-4">
@@ -529,6 +580,10 @@ function UMLClassDiagram() {
           {/* Boton para abrir el modal de script base de datos */}
           <button className='bg-orange-400 hover:bg-green-600 text-white px-4 py-2 rounded'
             onClick={openDatabaseScriptModal}>Script Base de Datos</button>
+
+          {/* Boton para descargar las vistas */}
+          <button className='bg-orange-400 hover:bg-green-600 text-white px-4 py-2 rounded'
+            onClick={generateAndDownloadZip}>Descargar Vistas</button>
 
         </div>
         <DiagramComponent
