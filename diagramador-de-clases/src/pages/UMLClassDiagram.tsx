@@ -381,6 +381,7 @@ function UMLClassDiagram() {
 
   useEffect(() => {
     console.log('Se ejecuto el useEffect de nodes');
+
     connectors.map((connector) => {
       diagramInstanceRef.current?.add(connector);
     });
@@ -486,20 +487,47 @@ function UMLClassDiagram() {
               onClick={() => openAttributeModal(nodeIdCreateAtribute)}>Añadir Atributo</button>
           )}
 
+          {/* Eliminar nodo con sus atributos */}
+          {nodeIdCreateAtribute && (
+            <button className='bg-red-500 mr-3 hover:bg-green-600 text-white px-4 py-2 rounded'
+              onClick={() => {
+                const newNodes = nodes.filter((node) => node.id !== nodeIdCreateAtribute);
+                const newConnectors = connectors.map((connector) => {
+                  if (connector.sourceID === nodeIdCreateAtribute || connector.targetID === nodeIdCreateAtribute) {
+                    connector.sourceID = '';
+                    connector.targetID = '';
+                  }
+                  return connector;
+                });
+                setNodes(newNodes);
+                setNodeOptions(newNodes);
+                setConnectors(newConnectors);
+                const data = {
+                  id: params._id,
+                  nodes: newNodes,
+                  connectors: newConnectors,
+                };
+                updateDiagram(data);
+
+                diagramInstanceRef.current?.clear();
+
+              }}>Eliminar Nodo</button>
+          )}
+
           {/* Botón para abrir el modal de editar nodo */}
           {nodeIdCreateAtribute && (
-            <button className='bg-green-500 mr-3 hover:bg-green-600 text-white px-4 py-2 rounded'
+            <button className='bg-blue-500 mr-3 hover:bg-green-600 text-white px-4 py-2 rounded'
               onClick={() => openNodeModal(nodeIdCreateAtribute)}>Editar Nodo</button>
           )}
 
           {/* Botón para abrir el modal de editar conector */}
           {connectorId && (
-            <button className='bg-green-500 mr-3 hover:bg-green-600 text-white px-4 py-2 rounded'
+            <button className='bg-blue-500 mr-3 hover:bg-green-600 text-white px-4 py-2 rounded'
               onClick={() => openConnectorEditModal(connectorId)}>Editar Conector</button>
           )}
 
           {/* Boton para abrir el modal de script base de datos */}
-          <button className='bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded'
+          <button className='bg-orange-400 hover:bg-green-600 text-white px-4 py-2 rounded'
             onClick={openDatabaseScriptModal}>Script Base de Datos</button>
 
         </div>
